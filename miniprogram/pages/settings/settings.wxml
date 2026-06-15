@@ -1,0 +1,43 @@
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="text-3xl font-bold text-foreground mb-4">{{t.settings}}</view>
+  </view>
+
+  <!-- User Info -->
+  <view wx:if="{{isAuthenticated && user}}" class="card mb-4">
+    <view class="section-title">{{t.user}}</view>
+    <view class="text-xl font-bold text-foreground">{{user.name || t.user}}</view>
+    <view wx:if="{{user.email}}" class="text-sm font-medium text-muted mt-1">{{user.email}}</view>
+  </view>
+
+  <!-- Household & Stats -->
+  <view wx:if="{{isAuthenticated}}" class="mb-4">
+    <!-- Household Card -->
+    <view class="card mb-4" bindtap="goToFamily">
+      <view class="flex items-center justify-between">
+        <view>
+          <view class="section-title">{{t.family}}</view>
+          <view class="text-lg font-bold text-foreground">{{household.name || t.noHousehold}}</view>
+        </view>
+        <view class="text-primary text-sm">{{t.viewMembers}}</view>
+      </view>
+    </view>
+
+    <!-- Recipe Count -->
+    <view class="card">
+      <view class="section-title">{{t.totalRecipes}}</view>
+      <view class="text-3xl font-bold text-primary">{{recipeCount}}</view>
+    </view>
+  </view>
+
+  <!-- Logout -->
+  <view wx:if="{{isAuthenticated}}" class="mb-8" style="margin-top: 80rpx;">
+    <button class="btn btn-danger" bindtap="handleLogout">{{t.logout}}</button>
+  </view>
+
+  <!-- Login -->
+  <view wx:if="{{!isAuthenticated}}" class="mb-8 mt-4">
+    <button class="btn btn-primary" bindtap="goToLogin">{{t.login}}</button>
+  </view>
+</view>

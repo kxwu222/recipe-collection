@@ -1,0 +1,12 @@
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.icon-text {
+  display: block;
+  text-align: center;
+  font-weight: 500;
+}

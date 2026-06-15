@@ -1,0 +1,93 @@
+<view class="container">
+  <!-- Header -->
+  <view class="flex items-center justify-between mb-4">
+    <view class="text-3xl font-bold text-foreground">{{t.family}}</view>
+  </view>
+
+  <!-- Not Authenticated -->
+  <view wx:if="{{!isAuthenticated}}" class="flex-col items-center justify-center" style="min-height: 60vh;">
+    <view class="text-xl font-bold text-foreground mb-4">{{t.loginToContinue}}</view>
+    <button class="btn btn-primary" bindtap="goToLogin">
+      <text>{{t.wechatLogin}}</text>
+    </button>
+  </view>
+
+  <!-- Loading -->
+  <view wx:elif="{{isLoading}}" class="loading-container">
+    <view>{{t.loading}}</view>
+  </view>
+
+  <!-- No Household -->
+  <view wx:elif="{{!household && !showCreateForm}}" class="empty-state">
+    <view class="empty-state-text">{{t.noHousehold}}</view>
+    <button class="btn btn-primary btn-sm mt-4" bindtap="showCreate">{{t.createHousehold}}</button>
+  </view>
+
+  <!-- Create Form -->
+  <view wx:elif="{{showCreateForm}}">
+    <view class="card mb-4">
+      <view class="form-label">{{t.familyName}}</view>
+      <input 
+        class="input-field" 
+        placeholder="{{t.familyName}}"
+        value="{{householdName}}"
+        bindinput="onHouseholdNameInput"
+      />
+    </view>
+    <view class="flex gap-3">
+      <view class="btn btn-outline flex-1" bindtap="cancelForms">{{t.cancel}}</view>
+      <view class="btn btn-primary flex-1" bindtap="handleCreateHousehold">{{t.save}}</view>
+    </view>
+  </view>
+
+  <!-- Household Info -->
+  <view wx:else>
+    <!-- Household Card -->
+    <view class="card mb-4">
+      <view wx:if="{{!isEditing}}">
+        <view class="flex items-center justify-between">
+          <view>
+            <view class="text-xl font-bold text-foreground">{{household.name}}</view>
+          </view>
+          <view class="text-sm text-primary" bindtap="startEditing">
+            <image src="/assets/images/edit.png" style="width: 28rpx; height: 28rpx;"></image>
+          </view>
+        </view>
+      </view>
+      <view wx:else>
+        <view class="form-label">{{t.editHouseholdName}}</view>
+        <input 
+          class="input-field mb-3" 
+          value="{{editHouseholdName}}"
+          bindinput="onEditHouseholdNameInput"
+        />
+        <view class="flex gap-3">
+          <view class="btn btn-outline flex-1" bindtap="cancelEditing">{{t.cancel}}</view>
+          <view class="btn btn-primary flex-1" bindtap="handleUpdateHousehold">{{t.save}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Members -->
+    <view class="mb-4">
+      <view class="text-lg font-bold text-foreground mb-3">{{t.members}}</view>
+      <view wx:if="{{members.length > 0}}">
+        <view wx:for="{{members}}" wx:key="id" class="card mb-6">
+          <view class="flex items-center">
+            <view class="flex-1">
+              <view class="font-bold text-foreground">{{item.user.name || t.user}}</view>
+              <view class="text-sm text-muted">{{item.user.email}}</view>
+            </view>
+            <view class="text-sm text-primary">{{item.role === 'admin' ? t.admin : t.member}}</view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="text-muted text-center py-4">暂无成员</view>
+    </view>
+
+    <!-- Invite -->
+    <button class="btn btn-primary" open-type="share" style="padding-top: 20rpx;">
+      <text>{{t.inviteFriend}}</text>
+    </button>
+  </view>
+</view>

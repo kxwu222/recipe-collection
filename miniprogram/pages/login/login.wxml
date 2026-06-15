@@ -1,0 +1,15 @@
+<view class="container flex-col items-center justify-center" style="min-height: 80vh;">
+  <view class="text-3xl font-bold text-foreground mb-4">{{t.appName}}</view>
+  <view class="text-center text-muted mb-8">{{t.appDesc}}</view>
+  
+  <button 
+    class="btn btn-primary" 
+    style="width: 100%; max-width: 600rpx;"
+    bindtap="handleWechatLogin"
+    loading="{{isLoading}}"
+    disabled="{{isLoading}}"
+  >
+    <text wx:if="{{!isLoading}}">{{t.wechatLogin}}</text>
+    <text wx:else>{{t.loading}}</text>
+  </button>
+</view>

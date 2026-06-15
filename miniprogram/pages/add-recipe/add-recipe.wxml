@@ -1,0 +1,221 @@
+<view class="container">
+  <!-- Not Authenticated -->
+  <view wx:if="{{!isAuthenticated}}" class="flex-col items-center justify-center" style="min-height: 60vh;">
+    <image src="/assets/images/recipes.png" style="width: 120rpx; height: 120rpx; margin-bottom: 24rpx;"></image>
+    <view class="text-xl font-bold text-foreground mb-4">{{t.loginToContinue}}</view>
+    <button class="btn btn-primary" bindtap="goToLogin">
+      <text>{{t.wechatLogin}}</text>
+    </button>
+  </view>
+
+  <!-- Authenticated -->
+  <view wx:else>
+    <!-- Page Header -->
+    <view class="page-header">
+      <view class="page-title">{{t.addRecipe}}</view>
+      <view class="feature-badge">
+        <image src="/assets/images/recipe.png" style="width: 24rpx; height: 24rpx;"></image>
+        <text>{{t.smartRecognition}}</text>
+      </view>
+    </view>
+
+    <!-- Input Section -->
+    <view class="card mb-4">
+      <view class="example-hint">
+        <text class="example-label">示例：</text>
+        <text class="example-text">番茄炒蛋，番茄2个，鸡蛋3个，1.番茄切块...</text>
+      </view>
+      <textarea 
+        class="recipe-textarea" 
+        placeholder="{{t.smartRecognitionPlaceholder}}"
+        value="{{smartText}}"
+        bindinput="onSmartTextInput"
+      />
+      <view class="source-url-input">
+        <view class="form-label">{{t.sourceUrl}}</view>
+        <input 
+          class="input-field" 
+          placeholder="{{t.sourceUrlPlaceholder}}" 
+          value="{{sourceUrl}}"
+          bindinput="onSourceUrlInput"
+        />
+      </view>
+      <view class="btn btn-primary btn-block" bindtap="handleSmartParse">
+        <text>{{isParsing ? t.loading : t.parseAndFill}}</text>
+      </view>
+    </view>
+
+    <!-- Parsed Result -->
+    <view wx:if="{{parsedResult}}" class="card mb-4">
+      <view class="section-header">
+        <image src="/assets/images/check.png" style="width: 40rpx; height: 40rpx;"></image>
+        <text class="section-title">{{t.parsedResult}}</text>
+      </view>
+      <view class="text-sm text-muted mb-4">{{t.parsedResultHint}}</view>
+      
+      <!-- Image Upload -->
+      <view class="form-group">
+        <view class="form-label">{{t.imageUpload}}</view>
+        <view class="image-upload-area" bindtap="chooseImage">
+          <image wx:if="{{imageUrl}}" src="{{imageUrl}}" class="uploaded-image" mode="aspectFill"></image>
+          <view wx:else class="upload-placeholder">
+            <image src="/assets/images/camera.png" style="width: 48rpx; height: 48rpx;"></image>
+            <view class="text-muted text-sm">点击上传图片</view>
+          </view>
+          <view wx:if="{{imageUrl}}" class="image-delete-btn" catchtap="removeImage">
+            <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+          </view>
+        </view>
+      </view>
+
+      <!-- Recipe Name -->
+      <view class="form-group">
+        <view class="form-label">{{t.recipeName}}</view>
+        <input 
+          class="input-field" 
+          placeholder="{{t.enterRecipeName}}"
+          value="{{parsedResult.name}}"
+          bindinput="onParsedNameInput"
+        />
+      </view>
+
+      <!-- Cooking Method & Dish Type -->
+      <view class="flex gap-4">
+        <view class="flex-1 form-group">
+          <view class="form-label">{{t.cookingMethod}}</view>
+          <view class="dropdown">
+            <view class="dropdown-trigger" bindtap="toggleParsedCookingMethodDropdown">
+              <view class="{{parsedResult.cookingMethod ? 'text-foreground' : 'text-muted'}}">
+                {{parsedResult.cookingMethod ? t[parsedResult.cookingMethod] : t.pleaseSelectCookingMethod}}
+              </view>
+              <image src="/assets/images/{{showParsedCookingMethodDropdown ? 'arrow-up' : 'arrow-down'}}.png" style="width: 24rpx; height: 24rpx;"></image>
+            </view>
+            <view wx:if="{{showParsedCookingMethodDropdown}}" class="dropdown-list">
+              <view 
+                wx:for="{{cookingMethods}}" 
+                wx:key="id"
+                class="dropdown-item {{parsedResult.cookingMethod === item.id ? 'selected' : ''}}"
+                data-method="{{item.id}}"
+                bindtap="selectParsedCookingMethod"
+              >
+                <text>{{item.label}}</text>
+                <image wx:if="{{parsedResult.cookingMethod === item.id}}" src="/assets/images/check.png" style="width: 24rpx; height: 24rpx;"></image>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="flex-1 form-group">
+          <view class="form-label">{{t.dishType}}</view>
+          <view class="dropdown">
+            <view class="dropdown-trigger" bindtap="toggleParsedDishTypeDropdown">
+              <view class="{{parsedResult.dishType ? 'text-foreground' : 'text-muted'}}">
+                {{parsedResult.dishType ? t[parsedResult.dishType] : t.pleaseSelectDishType}}
+              </view>
+              <image src="/assets/images/{{showParsedDishTypeDropdown ? 'arrow-up' : 'arrow-down'}}.png" style="width: 24rpx; height: 24rpx;"></image>
+            </view>
+            <view wx:if="{{showParsedDishTypeDropdown}}" class="dropdown-list">
+              <view 
+                wx:for="{{dishTypes}}" 
+                wx:key="id"
+                class="dropdown-item {{parsedResult.dishType === item.id ? 'selected' : ''}}"
+                data-type="{{item.id}}"
+                bindtap="selectParsedDishType"
+              >
+                <text>{{item.label}}</text>
+                <image wx:if="{{parsedResult.dishType === item.id}}" src="/assets/images/check.png" style="width: 24rpx; height: 24rpx;"></image>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Cook Time & Servings -->
+      <view class="flex gap-4">
+        <view class="flex-1 form-group">
+          <view class="form-label">{{t.cookTime}}</view>
+          <input 
+            class="input-field" 
+            type="number" 
+            placeholder="30" 
+            value="{{parsedResult.cookTime}}"
+            bindinput="onParsedCookTimeInput"
+          />
+        </view>
+        <view class="flex-1 form-group">
+          <view class="form-label">{{t.servings}}</view>
+          <input 
+            class="input-field" 
+            type="number" 
+            placeholder="4" 
+            value="{{parsedResult.servings}}"
+            bindinput="onParsedServingsInput"
+          />
+        </view>
+      </view>
+
+      <!-- Ingredients -->
+      <view class="form-group">
+        <view class="form-label">{{t.ingredients}}</view>
+        <view wx:for="{{parsedResult.ingredients}}" wx:key="index" class="ingredient-row mb-3">
+          <view class="ingredient-fields">
+            <text class="text-sm font-bold text-muted ingredient-index">#{{index + 1}}</text>
+            <input 
+              class="input-field ingredient-name" 
+              placeholder="名称" 
+              value="{{item.name}}"
+              data-index="{{index}}"
+              data-field="name"
+              bindinput="onParsedIngredientInput"
+            />
+            <input 
+              class="input-field ingredient-qty" 
+              placeholder="用量" 
+              value="{{item.quantity}}"
+              data-index="{{index}}"
+              data-field="quantity"
+              bindinput="onParsedIngredientInput"
+            />
+            <view class="ingredient-delete" data-index="{{index}}" bindtap="removeParsedIngredient">
+              <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+            </view>
+          </view>
+        </view>
+        <view class="btn btn-outline btn-sm" bindtap="addParsedIngredient">
+          <image src="/assets/images/plus-primary.png" style="width: 24rpx; height: 24rpx;"></image>
+          <text>{{t.addIngredient}}</text>
+        </view>
+      </view>
+
+      <!-- Steps -->
+      <view class="form-group">
+        <view class="form-label">{{t.steps}}</view>
+        <view wx:for="{{parsedResult.steps}}" wx:key="index" class="step-row mb-3">
+          <view class="step-content">
+            <view class="step-number">{{index + 1}}</view>
+            <view class="step-input-wrapper">
+              <textarea 
+                class="input-field step-textarea" 
+                placeholder="步骤说明" 
+                value="{{item.instruction}}"
+                data-index="{{index}}"
+                data-field="instruction"
+                bindinput="onParsedStepInput"
+                auto-height
+              />
+            </view>
+            <view class="step-delete" data-index="{{index}}" bindtap="removeParsedStep">
+              <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+            </view>
+          </view>
+        </view>
+        <view class="btn btn-outline btn-sm" bindtap="addParsedStep">
+          <image src="/assets/images/plus-primary.png" style="width: 24rpx; height: 24rpx;"></image>
+          <text>{{t.addStep}}</text>
+        </view>
+      </view>
+
+      <button class="btn btn-primary btn-block mt-4" bindtap="handleApplyParsed">{{t.useParsedData}}</button>
+    </view>
+  </view>
+</view>

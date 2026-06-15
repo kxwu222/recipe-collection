@@ -1,0 +1,55 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/recipes/recipes",
+    "pages/recipe/recipe",
+    "pages/add-recipe/add-recipe",
+    "pages/this-week/this-week",
+    "pages/settings/settings",
+    "pages/login/login",
+    "pages/family/family"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F5F1ED",
+    "navigationBarTitleText": "食谱集",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F1ED"
+  },
+  "usingComponents": {},
+  "tabBar": {
+    "color": "#8B8B8B",
+    "selectedColor": "#D4A574",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/images/home.png",
+        "selectedIconPath": "assets/images/home-active.png"
+      },
+      {
+        "pagePath": "pages/recipes/recipes",
+        "text": "菜谱",
+        "iconPath": "assets/images/recipes.png",
+        "selectedIconPath": "assets/images/recipes-active.png"
+      },
+      {
+        "pagePath": "pages/this-week/this-week",
+        "text": "本周",
+        "iconPath": "assets/images/calendar.png",
+        "selectedIconPath": "assets/images/calendar-active.png"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "设置",
+        "iconPath": "assets/images/settings.png",
+        "selectedIconPath": "assets/images/settings-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

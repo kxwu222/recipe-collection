@@ -1,0 +1,83 @@
+/* Recipe page styles */
+
+/* Step number - smaller size */
+.step-number {
+  width: 40rpx;
+  height: 40rpx;
+  font-size: 22rpx;
+}
+
+/* Image upload area */
+.image-upload-area {
+  width: 100%;
+  height: 300rpx;
+  border: 2rpx dashed var(--border);
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  overflow: hidden;
+  position: relative;
+}
+
+.image-delete-btn {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 24rpx;
+  z-index: 10;
+}
+
+.image-delete-btn:active {
+  opacity: 0.8;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* Source URL */
+.source-url-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.source-url-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--text-muted);
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.source-url {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  word-break: break-all;
+  padding: 12rpx;
+  background: var(--background);
+  border-radius: 12rpx;
+}

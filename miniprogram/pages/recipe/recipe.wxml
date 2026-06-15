@@ -1,0 +1,312 @@
+<view class="container">
+  <!-- Loading -->
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <view>{{t.loading}}</view>
+  </view>
+
+  <!-- Not Authenticated -->
+  <view wx:elif="{{!isAuthenticated}}" class="flex-col items-center justify-center" style="min-height: 60vh;">
+    <image src="/assets/images/recipes.png" style="width: 120rpx; height: 120rpx; margin-bottom: 24rpx;"></image>
+    <view class="text-xl font-bold text-foreground mb-4">{{t.loginToContinue}}</view>
+    <button class="btn btn-primary" bindtap="goToLogin">
+      <text>{{t.wechatLogin}}</text>
+    </button>
+  </view>
+
+  <!-- Recipe Not Found -->
+  <view wx:elif="{{!recipe}}" class="empty-state">
+    <view class="empty-state-icon">
+      <image src="/assets/images/recipes.png" style="width: 80rpx; height: 80rpx;"></image>
+    </view>
+    <view class="empty-state-text">菜谱未找到</view>
+    <button class="btn btn-primary btn-sm mt-4" bindtap="goBack">{{t.back}}</button>
+  </view>
+
+  <!-- Edit Mode -->
+  <view wx:elif="{{isEditing}}">
+    <!-- Dropdown mask -->
+    <view wx:if="{{showCookingMethodDropdown || showDishTypeDropdown}}" 
+          class="dropdown-mask" 
+          bindtap="closeAllDropdowns"></view>
+    
+    <view class="flex items-center justify-between mb-4">
+      <view class="text-xl font-bold text-foreground">{{t.edit}}</view>
+      <view class="btn btn-outline btn-sm btn-pill" bindtap="cancelEditing">{{t.cancel}}</view>
+    </view>
+
+    <view class="card mb-4">
+      <!-- Recipe Image -->
+      <view class="form-group">
+        <view class="form-label">菜谱图片</view>
+        <view class="image-upload-area" bindtap="chooseImage">
+          <image wx:if="{{editImageUrl}}" src="{{editImageUrl}}" class="uploaded-image" mode="aspectFill"></image>
+          <view wx:else class="upload-placeholder">
+            <image src="/assets/images/camera.png" style="width: 48rpx; height: 48rpx;"></image>
+            <view class="text-muted text-sm">点击上传图片</view>
+          </view>
+          <view wx:if="{{editImageUrl}}" class="image-delete-btn" catchtap="removeEditImage">
+            <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+          </view>
+        </view>
+      </view>
+
+      <!-- Recipe Name -->
+      <view class="form-group">
+        <view class="form-label">{{t.recipeName}}</view>
+        <input 
+          class="input-field" 
+          value="{{editName}}"
+          data-field="editName"
+          bindinput="onEditInput"
+        />
+      </view>
+
+      <!-- Cooking Method -->
+      <view class="form-group">
+        <view class="form-label">{{t.cookingMethod}}</view>
+        <view class="dropdown">
+          <view class="dropdown-trigger" bindtap="toggleCookingMethodDropdown">
+            <view class="{{editCookingMethod ? 'text-foreground' : 'text-muted'}}">
+              {{editCookingMethod ? t[editCookingMethod] : t.pleaseSelectCookingMethod}}
+            </view>
+            <image src="/assets/images/{{showCookingMethodDropdown ? 'arrow-up' : 'arrow-down'}}.png" style="width: 24rpx; height: 24rpx;"></image>
+          </view>
+          <view wx:if="{{showCookingMethodDropdown}}" class="dropdown-list">
+            <view 
+              wx:for="{{cookingMethods}}" 
+              wx:key="id"
+              class="dropdown-item {{editCookingMethod === item.id ? 'selected' : ''}}"
+              data-method="{{item.id}}"
+              bindtap="selectCookingMethod"
+            >
+              <text>{{item.label}}</text>
+              <image wx:if="{{editCookingMethod === item.id}}" src="/assets/images/check.png" style="width: 24rpx; height: 24rpx;"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Dish Type -->
+      <view class="form-group">
+        <view class="form-label">{{t.dishType}}</view>
+        <view class="dropdown">
+          <view class="dropdown-trigger" bindtap="toggleDishTypeDropdown">
+            <view class="{{editDishType ? 'text-foreground' : 'text-muted'}}">
+              {{editDishType ? t[editDishType] : t.pleaseSelectDishType}}
+            </view>
+            <image src="/assets/images/{{showDishTypeDropdown ? 'arrow-up' : 'arrow-down'}}.png" style="width: 24rpx; height: 24rpx;"></image>
+          </view>
+          <view wx:if="{{showDishTypeDropdown}}" class="dropdown-list">
+            <view 
+              wx:for="{{dishTypes}}" 
+              wx:key="id"
+              class="dropdown-item {{editDishType === item.id ? 'selected' : ''}}"
+              data-type="{{item.id}}"
+              bindtap="selectDishType"
+            >
+              <text>{{item.label}}</text>
+              <image wx:if="{{editDishType === item.id}}" src="/assets/images/check.png" style="width: 24rpx; height: 24rpx;"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Cook Time & Servings -->
+      <view class="flex gap-4">
+        <view class="flex-1 form-group">
+          <view class="form-label">{{t.cookTime}}</view>
+          <input 
+            class="input-field" 
+            type="number" 
+            placeholder="30" 
+            value="{{editCookTime}}"
+            data-field="editCookTime"
+            bindinput="onEditInput"
+          />
+        </view>
+        <view class="flex-1 form-group">
+          <view class="form-label">{{t.servings}}</view>
+          <input 
+            class="input-field" 
+            type="number" 
+            placeholder="4" 
+            value="{{editServings}}"
+            data-field="editServings"
+            bindinput="onEditInput"
+          />
+        </view>
+      </view>
+
+      <!-- Source URL -->
+      <view class="form-group">
+        <view class="form-label">{{t.sourceUrl}}</view>
+        <input 
+          class="input-field" 
+          placeholder="{{t.sourceUrlPlaceholder}}" 
+          value="{{editSourceUrl}}"
+          data-field="editSourceUrl"
+          bindinput="onEditInput"
+        />
+      </view>
+    </view>
+
+    <!-- Ingredients -->
+    <view class="card mb-4">
+      <view class="form-label">{{t.ingredients}}</view>
+      <view wx:for="{{editIngredients}}" wx:key="index" class="ingredient-row mb-3">
+        <view class="ingredient-fields">
+          <text class="text-sm font-bold text-muted ingredient-index">#{{index + 1}}</text>
+          <input 
+            class="input-field ingredient-name" 
+            placeholder="名称" 
+            value="{{item.name}}"
+            data-index="{{index}}"
+            data-field="name"
+            bindinput="onIngredientInput"
+          />
+          <input 
+            class="input-field ingredient-qty" 
+            placeholder="用量" 
+            value="{{item.quantity}}"
+            data-index="{{index}}"
+            data-field="quantity"
+            bindinput="onIngredientInput"
+          />
+          <view class="ingredient-delete" data-index="{{index}}" bindtap="removeIngredient">
+            <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+          </view>
+        </view>
+      </view>
+      <view class="btn btn-outline btn-sm" 
+      style="font-weight: 400;"
+      bindtap="addIngredient">
+        <image src="/assets/images/plus-primary.png" style="width: 24rpx; height: 24rpx;"></image>
+        <text>{{t.addIngredient}}</text>
+      </view>
+    </view>
+
+    <!-- Steps -->
+    <view class="card mb-4">
+      <view class="form-label">{{t.steps}}</view>
+      <view wx:for="{{editSteps}}" wx:key="index" class="step-row mb-3">
+        <view class="step-content" style="padding-top: 5rpx;">
+          <view class="step-number">{{index + 1}}
+          </view>
+          <view class="step-input-wrapper">
+            <textarea 
+              class="input-field step-textarea" 
+              placeholder="步骤说明" 
+              value="{{item.instruction}}"
+              data-index="{{index}}"
+              data-field="instruction"
+              bindinput="onStepInput"
+              auto-height
+            />
+          </view>
+          <view class="step-delete" data-index="{{index}}" bindtap="removeStep">
+            <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+          </view>
+        </view>
+      </view>
+      <view class="btn btn-outline btn-sm" 
+      style="font-weight: 400;"
+      bindtap="addStep">
+        <image src="/assets/images/plus-primary.png" style="width: 24rpx; height: 24rpx;"></image>
+        <text>{{t.addStep}}</text>
+      </view>
+    </view>
+
+    <button class="btn btn-primary" style="margin-top: 48rpx; margin-bottom: 120rpx;" bindtap="handleSave">{{t.save}}</button>
+  </view>
+
+  <!-- View Mode -->
+  <view wx:else>
+    <!-- Action Buttons -->
+    <view class="flex justify-end gap-3 mb-4">
+      <view class="btn btn-outline btn-sm" bindtap="handleDelete" style="border-color: var(--error); color: var(--error);">
+        <image src="/assets/images/close-red.png" style="width: 24rpx; height: 24rpx;"></image>
+        <text>{{t.delete}}</text>
+      </view>
+      <view class="btn btn-outline btn-sm" bindtap="startEditing">
+        <image src="/assets/images/edit-grey.png" style="width: 24rpx; height: 24rpx; padding-right: 4rpx"></image>
+        <text style="font-weight: 400">{{t.edit}}</text>
+      </view>
+    </view>
+
+    <!-- Recipe Name -->
+    <view class="text-3xl font-bold text-foreground mb-2">
+      {{recipe.name}}
+    </view>
+    <view wx:if="{{recipe.nameEn}}" class="text-muted mb-4">
+      {{recipe.nameEn}}
+    </view>
+
+    <!-- Quick Info -->
+    <view class="info-chips mb-4">
+      <view wx:if="{{recipe.cookingMethod}}" class="info-chip">
+        <view class="info-chip-label">{{t.cookingMethod}}</view>
+        <view class="info-chip-value">{{t[recipe.cookingMethod]}}</view>
+      </view>
+      <view wx:if="{{recipe.dishType}}" class="info-chip">
+        <view class="info-chip-label">{{t.dishType}}</view>
+        <view class="info-chip-value">{{t[recipe.dishType]}}</view>
+      </view>
+      <view wx:if="{{recipe.cookTimeMinutes}}" class="info-chip">
+        <view class="info-chip-label">{{t.cookTime}}</view>
+        <view class="info-chip-value">{{recipe.cookTimeMinutes}} {{t.minutes}}</view>
+      </view>
+      <view wx:if="{{recipe.servings}}" class="info-chip">
+        <view class="info-chip-label">{{t.servings}}</view>
+        <view class="info-chip-value">{{recipe.servings}}</view>
+      </view>
+    </view>
+
+    <!-- Description -->
+    <view wx:if="{{recipe.description}}" class="card mb-4">
+      <view class="form-label">{{t.description}}</view>
+      <view class="text-foreground" style="line-height: 1.8;">
+        {{recipe.description}}
+      </view>
+    </view>
+
+    <!-- Source URL -->
+    <view wx:if="{{recipe.sourceUrl}}" class="card mb-4">
+      <view class="form-label">{{t.sourceUrl}}</view>
+      <view class="source-url-row">
+        <text class="source-url-text">{{recipe.sourceUrl}}</text>
+        <view class="btn btn-outline btn-sm" bindtap="copySourceUrl">
+          <text>{{t.copyLink}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Ingredients -->
+    <view wx:if="{{recipe.ingredients.length > 0}}" class="card mb-4">
+      <view class="form-label">{{t.ingredients}}</view>
+      <view wx:for="{{recipe.ingredients}}" wx:key="index" class="ingredient-row">
+        <view class="ingredient-name">{{item.name}}</view>
+        <view class="ingredient-quantity">
+          <text wx:if="{{item.quantity}}">{{item.quantity}} {{item.unit || ''}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Steps -->
+    <view wx:if="{{recipe.steps.length > 0}}" class="card mb-4">
+      <view class="form-label">{{t.steps}}</view>
+      <view wx:for="{{recipe.steps}}" wx:key="index" class="step-item">
+        <view class="step-number">{{index + 1}}</view>
+        <view class="step-content">
+          <view class="step-instruction">{{item.instruction}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Action Buttons - only show if not from this week -->
+    <view wx:if="{{!fromWeek}}" class="action-bar mt-6">
+      <button class="btn btn-primary" bindtap="handleAddToWeek">
+        <text>{{t.addToThisWeek}}</text>
+      </button>
+    </view>
+  </view>
+</view>

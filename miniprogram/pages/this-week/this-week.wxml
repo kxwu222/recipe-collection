@@ -1,0 +1,192 @@
+<view class="container">
+  <!-- Header -->
+  <view class="flex items-center justify-between mb-4">
+    <view class="text-3xl font-bold text-foreground">{{t.thisWeek}}</view>
+  </view>
+
+  <!-- Not Authenticated -->
+  <view wx:if="{{!isAuthenticated}}" class="flex-col items-center justify-center" style="min-height: 60vh;">
+    <image src="/assets/images/calendar.png" style="width: 120rpx; height: 120rpx; margin-bottom: 24rpx;"></image>
+    <view class="text-xl font-bold text-foreground mb-4">{{t.loginToContinue}}</view>
+    <button class="btn btn-primary" bindtap="goToLogin">
+      <text>{{t.wechatLogin}}</text>
+    </button>
+  </view>
+
+  <!-- Authenticated -->
+  <view wx:else>
+    <!-- Date Range Selector -->
+    <view class="date-range-section mb-4">
+      <view class="date-range-header">
+        <view class="date-display-text">{{dateDisplayText}}</view>
+        <view class="date-range-toggle" bindtap="toggleDateRange">
+          <text class="toggle-text">{{isDateRangeExpanded ? '收起' : '展开'}}</text>
+          <image src="/assets/images/{{isDateRangeExpanded ? 'caret-up' : 'caret-down'}}.png" style="width: 24rpx; height: 24rpx;"></image>
+        </view>
+      </view>
+      <view wx:if="{{isDateRangeExpanded}}">
+        <view class="date-range-presets" style="gap: 24rpx;">
+          <view class="date-preset {{dateRangeType === 'today' ? 'active' : ''}}" bindtap="setDateRange" data-type="today">{{t.today}}</view>
+          <view class="date-preset {{dateRangeType === 'week' ? 'active' : ''}}" bindtap="setDateRange" data-type="week">{{t.thisWeek}}</view>
+          <view class="date-preset {{dateRangeType === 'custom' ? 'active' : ''}}" bindtap="setDateRange" data-type="custom">{{t.customRange}}</view>
+        </view>
+        <view wx:if="{{dateRangeType === 'custom'}}" class="date-picker-row">
+          <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+            <view class="date-picker">
+              <text class="date-picker-text">{{startDate || t.startDate}}</text>
+            </view>
+          </picker>
+          <text class="date-separator">-</text>
+          <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+            <view class="date-picker">
+              <text class="date-picker-text">{{endDate || t.endDate}}</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+    </view>
+
+    <!-- Tab Selector -->
+    <view class="mode-selector mb-4">
+      <view 
+        class="mode-tab {{activeTab === 'plan' ? 'active' : ''}}" 
+        data-tab="plan" 
+        bindtap="switchTab"
+      >
+        <text>{{t.weeklyPlan}}</text>
+      </view>
+      <view 
+        class="mode-tab {{activeTab === 'tobuy' ? 'active' : ''}}" 
+        data-tab="tobuy" 
+        bindtap="switchTab"
+      >
+        <text>{{t.toBuyList}}</text>
+      </view>
+    </view>
+
+    <!-- Loading -->
+    <view wx:if="{{isLoading}}" class="loading-container">
+      <view>{{t.loading}}</view>
+    </view>
+
+    <!-- Weekly Plan Tab -->
+    <view wx:if="{{activeTab === 'plan' && !isLoading}}">
+      <view wx:if="{{weeklyPlan.length > 0}}">
+        <view 
+          wx:for="{{weeklyPlan}}" 
+          wx:key="id"
+          class="week-recipe-card mb-3"
+        >
+          <view class="week-recipe-content" data-id="{{item.recipe.id}}" bindtap="goToRecipe">
+            <view class="week-recipe-image">
+              <image wx:if="{{item.recipe.imageUrl}}" src="{{item.recipe.imageUrl}}" mode="aspectFill"></image>
+              <image wx:else src="/assets/images/recipes.png" style="width: 40rpx; height: 40rpx;"></image>
+            </view>
+            <view class="week-recipe-info">
+              <view class="week-recipe-name">{{item.recipe.name}}</view>
+              <view class="week-recipe-tags">
+                <text wx:if="{{item.recipe.cookingMethodLabel}}" class="week-tag">{{item.recipe.cookingMethodLabel}}</text>
+                <text wx:if="{{item.recipe.dishTypeLabel}}" class="week-tag">{{item.recipe.dishTypeLabel}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="week-recipe-delete" data-id="{{item.id}}"
+          bindtap="handleRemoveFromWeek">
+            <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+          </view>
+        </view>
+      </view>
+
+      <view wx:else class="empty-state">
+        <view class="empty-state-icon">
+          <image src="/assets/images/calendar.png" style="width: 80rpx; height: 80rpx;"></image>
+        </view>
+        <view class="empty-state-text">{{t.noRecipes}}</view>
+        <button class="btn btn-primary btn-sm mt-4" 
+        style="width: fit-content; padding: 16rpx 30rpx;"
+        bindtap="goToAddToWeek">
+          <image src="/assets/images/plus-dark.png" style="width: 24rpx; height: 24rpx;"></image>
+          <text style="margin-left: 4rpx;">{{t.addToWeek}}</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- To-Buy List Tab -->
+    <view wx:if="{{activeTab === 'tobuy' && !isLoading}}">
+      <view class="flex items-center mb-4" style="justify-content: flex-end;">
+        <view class="btn btn-primary btn-sm" bindtap="showAddItemModal">
+          <image src="/assets/images/plus-dark.png" style="width: 24rpx; height: 24rpx;"></image>
+          <text style="margin-left: 4rpx;">{{t.addItem}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{toBuyList.length > 0}}">
+        <view 
+          wx:for="{{toBuyList}}" 
+          wx:key="id"
+          class="card to-buy-item mb-3 {{item.isChecked ? 'opacity-50' : ''}}"
+        >
+          <view class="flex items-center">
+            <view 
+              class="checkbox-item flex-1" 
+              data-id="{{item.id}}" 
+              data-checked="{{item.isChecked}}" 
+              bindtap="handleCheckToBuyItem"
+            >
+              <view class="checkbox-label {{item.isChecked ? 'checked' : ''}}">
+                {{item.itemName}}
+                <text wx:if="{{item.quantity}}" class="text-muted"> ({{item.quantity}} {{item.unit || ''}})</text>
+              </view>
+            </view>
+            <view class="text-muted ml-4" data-id="{{item.id}}" bindtap="handleDeleteToBuyItem">
+              <image src="/assets/images/close.png" style="width: 24rpx; height: 24rpx;"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:else class="empty-state">
+        <view class="empty-state-icon">
+          <image src="/assets/images/cart.png" style="width: 80rpx; height: 80rpx;"></image>
+        </view>
+        <view class="empty-state-text">{{t.noItems}}</view>
+      </view>
+    </view>
+
+    <!-- Add Item Modal -->
+    <view wx:if="{{showAddModal}}" class="modal-mask" bindtap="hideAddItemModal">
+      <view class="modal-content" catchtap="preventBubble">
+        <view class="modal-header">
+          <view class="modal-title">{{t.addItem}}</view>
+          <view class="modal-close" bindtap="hideAddItemModal">
+            <image src="/assets/images/close.png" style="width: 28rpx; height: 28rpx;"></image>
+          </view>
+        </view>
+        <view class="form-group">
+          <view class="form-label">{{t.itemName}}</view>
+          <input 
+            class="modal-input" 
+            placeholder="例如：鸡蛋"
+            value="{{newItemName}}"
+            bindinput="onNewItemNameInput"
+            catchtap="preventBubble"
+          />
+        </view>
+        <view class="form-group">
+          <view class="form-label">{{t.quantityAndUnit}}</view>
+          <input 
+            class="modal-input" 
+            placeholder="例如：2个"
+            value="{{newItemQuantity}}"
+            bindinput="onNewItemQuantityInput"
+            catchtap="preventBubble"
+          />
+        </view>
+        <view class="modal-buttons">
+          <view class="modal-btn modal-btn-cancel" bindtap="hideAddItemModal">{{t.cancel}}</view>
+          <view class="modal-btn modal-btn-confirm" bindtap="handleAddToBuyItem">{{t.confirm}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

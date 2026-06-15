@@ -1,0 +1,3 @@
+<view class="icon-container" style="width: {{size}}rpx; height: {{size}}rpx; line-height: {{size}}rpx; font-size: {{size * 0.8}}rpx; color: {{color}};" bindtap="onTap">
+  <text class="icon-text">{{iconChar}}</text>
+</view>

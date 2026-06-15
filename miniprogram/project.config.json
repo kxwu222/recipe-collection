@@ -1,0 +1,121 @@
+{
+  "miniprogramRoot": "./",
+  "projectname": "recipes-collection",
+  "description": "家庭食谱管理小程序",
+  "appid": "wx42484a5245395c99",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "preloadBackgroundData": false,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": false,
+    "autoAudits": false,
+    "showShadowRootInWxmlPanel": true,
+    "scopeDataCheck": false,
+    "uglifyFileName": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "compileHotReLoad": true,
+    "lazyloadPlaceholderEnable": false,
+    "useMultiFrameRuntime": true,
+    "useApiHook": true,
+    "useApiHostProcess": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "enableEngineNative": false,
+    "useIsolateContext": true,
+    "userConfirmedBundleSwitch": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "disableUseStrict": false,
+    "minifyWXML": true,
+    "showES6CompileOption": false,
+    "useCompilerPlugins": false,
+    "compileWorklet": false,
+    "localPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
+  },
+  "compileType": "miniprogram",
+  "condition": {},
+  "preview": {
+    "compiled": true,
+    "condition": {
+      "search": {
+        "list": []
+      },
+      "conversation": {
+        "list": []
+      },
+      "game": {
+        "list": []
+      },
+      "plugin": {
+        "list": []
+      },
+      "gamePlugin": {
+        "list": []
+      },
+      "miniprogram": {
+        "list": [
+          {
+            "name": "首页",
+            "pathName": "pages/index/index",
+            "query": ""
+          },
+          {
+            "name": "食谱列表",
+            "pathName": "pages/recipes/recipes",
+            "query": ""
+          },
+          {
+            "name": "食谱详情",
+            "pathName": "pages/recipe/recipe",
+            "query": "id=1"
+          },
+          {
+            "name": "添加食谱",
+            "pathName": "pages/add-recipe/add-recipe",
+            "query": ""
+          },
+          {
+            "name": "本周计划",
+            "pathName": "pages/this-week/this-week",
+            "query": ""
+          },
+          {
+            "name": "设置",
+            "pathName": "pages/settings/settings",
+            "query": ""
+          },
+          {
+            "name": "家庭",
+            "pathName": "pages/family/family",
+            "query": ""
+          },
+          {
+            "name": "登录",
+            "pathName": "pages/login/login",
+            "query": ""
+          }
+        ]
+      }
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
+}
