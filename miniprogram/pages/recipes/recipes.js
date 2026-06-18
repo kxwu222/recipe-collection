@@ -7,7 +7,6 @@ Page({
     recipes: [],
     filteredRecipes: [],
     isLoading: true,
-    isAuthenticated: false,
     householdId: null,
     searchQuery: '',
     selectedMethod: null,
@@ -23,7 +22,7 @@ Page({
       dishTypes: getDishTypes()
     })
     this.updateTranslations()
-    this.checkAuth()
+    this.loadData()
     
     if (options.focusSearch === 'true') {
       setTimeout(() => {
@@ -34,21 +33,11 @@ Page({
 
   onShow() {
     this.updateTranslations()
-    this.checkAuth()
-  },
-
-  checkAuth() {
-    const app = getApp()
-    const user = app.globalData.user
-    if (user) {
-      this.setData({ isAuthenticated: true })
-      this.loadData()
-    } else {
-      this.setData({
-        isAuthenticated: false,
-        isLoading: false
-      })
-    }
+    this.setData({
+      cookingMethods: getCookingMethods(),
+      dishTypes: getDishTypes()
+    })
+    this.loadData()
   },
 
   updateTranslations() {
@@ -171,11 +160,13 @@ Page({
   },
 
   goToRecipe(e) {
+    if (!util.requireAuth()) return
     const id = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/recipe/recipe?id=${id}` })
   },
 
   goToAddRecipe() {
+    if (!util.requireAuth()) return
     wx.navigateTo({ url: '/pages/add-recipe/add-recipe' })
   },
 

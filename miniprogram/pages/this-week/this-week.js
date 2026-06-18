@@ -7,7 +7,6 @@ Page({
     weeklyPlan: [],
     toBuyList: [],
     isLoading: true,
-    isAuthenticated: false,
     householdId: null,
     weekStartDate: null,
     activeTab: 'plan',
@@ -22,7 +21,7 @@ Page({
   onLoad() {
     this.updateTranslations()
     this.initDateRange()
-    this.checkAuth()
+    this.loadData()
   },
 
   initDateRange() {
@@ -38,35 +37,19 @@ Page({
 
   onShow() {
     this.updateTranslations()
-    this.checkAuth()
+    this.loadData()
     
     // Check if we need to refresh data
     const app = getApp()
     if (app.globalData.needRefreshThisWeek) {
       app.globalData.needRefreshThisWeek = false
-      if (this.data.isAuthenticated) {
-        this.loadData()
-      }
+      this.loadData()
     }
     
     // Check if we need to switch to tobuy tab
     if (app.globalData.switchToBuyTab) {
       app.globalData.switchToBuyTab = false
       this.setData({ activeTab: 'tobuy' })
-    }
-  },
-
-  checkAuth() {
-    const app = getApp()
-    const user = app.globalData.user
-    if (user) {
-      this.setData({ isAuthenticated: true })
-      this.loadData()
-    } else {
-      this.setData({
-        isAuthenticated: false,
-        isLoading: false
-      })
     }
   },
 

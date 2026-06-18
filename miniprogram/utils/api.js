@@ -50,14 +50,22 @@ function request(options) {
 
 // Mock data for development/testing - 持久化到本地存储
 const defaultRecipes = [
-  { id: 1, name: '番茄炒蛋', cookingMethod: 'stir_fry', dishType: 'cantonese', nameEn: 'Tomato Scrambled Eggs', cookTimeMinutes: 15, servings: 2, householdId: 1 },
-  { id: 2, name: '清蒸鱼', cookingMethod: 'steam', dishType: 'cantonese', nameEn: 'Steamed Fish', cookTimeMinutes: 20, servings: 4, householdId: 1 },
-  { id: 3, name: '凉拌黄瓜', cookingMethod: 'cold_mix', dishType: 'cantonese', nameEn: 'Cucumber Salad', cookTimeMinutes: 10, servings: 2, householdId: 1 }
+  { id: 1, name: '海皇粉丝煲', cookingMethod: 'stir_fry', dishType: 'cantonese', cookTimeMinutes: 30, servings: 4, householdId: 1, description: '朴朴的安格斯小炒牛肉片比较好吃', imageUrl: '/assets/images/海皇粉丝煲.jpg', sourceUrl: 'https://www.rednote.com/explore/69031f47000000000400737f', ingredients: [{name:'鲜虾',quantity:'350',unit:'克'},{name:'粉丝',quantity:'3',unit:'捆'},{name:'芹菜段',quantity:'适量',unit:''},{name:'红椒丝',quantity:'适量',unit:''},{name:'姜末',quantity:'适量',unit:''},{name:'蒜末',quantity:'适量',unit:''},{name:'生抽',quantity:'2',unit:'勺'},{name:'蚝油',quantity:'1',unit:'勺'},{name:'糖',quantity:'1',unit:'勺'},{name:'鸡精',quantity:'半',unit:'勺'},{name:'胡椒粉',quantity:'半',unit:'勺'},{name:'老抽',quantity:'1',unit:'勺'}], steps:[{instruction:'粉丝用冷水浸泡20分钟'},{instruction:'粉丝变软后加一勺老抽，拌匀上色，用剪刀剪短'},{instruction:'大虾洗干净去除虾须胃囊，剪下虾头，剥壳开背去掉虾线'},{instruction:'虾仁开水下锅烫一下，煮熟捞出'},{instruction:'虾头下锅，小火煎炒出虾油捞起'},{instruction:'姜蒜末炒出香味，下入香芹段、红椒丝、粉丝'},{instruction:'一边炒一边用筷子抖散粉丝'},{instruction:'倒入虾仁跟调好的酱汁，翻炒均匀出锅'}] },
+  { id: 2, name: '蚵仔煎', cookingMethod: 'pan_fry', dishType: 'chaoshan', cookTimeMinutes: 20, servings: 2, householdId: 1, description: '地瓜粉是灵魂，不能用普通淀粉替代', imageUrl: '/assets/images/蚵仔煎.jpg', sourceUrl: 'https://www.rednote.com/explore/69a59636000000000e03eeec', ingredients: [{name:'新鲜蚵仔（小海蛎）',quantity:'300',unit:'g'},{name:'地瓜粉',quantity:'90',unit:'g'},{name:'清水',quantity:'120',unit:'ml'},{name:'鸡蛋',quantity:'2',unit:'个'},{name:'青蒜/小葱',quantity:'适量',unit:''},{name:'猪油',quantity:'2',unit:'勺'},{name:'鱼露',quantity:'1',unit:'小勺'},{name:'白胡椒粉',quantity:'少许',unit:''},{name:'甜辣酱',quantity:'适量',unit:''}], steps:[{instruction:'蚵仔加少许盐+淀粉抓洗，冲净，用厨房纸彻底吸干水分'},{instruction:'地瓜粉+清水少量多次调至酸奶稠度，加入蚵仔、葱碎、鱼露、白胡椒粉轻拌'},{instruction:'鸡蛋打散备用'},{instruction:'平底锅烧热放猪油，倒入蚵仔糊快速铺平'},{instruction:'中火煎1分钟，转中小火盖锅盖焖30秒'},{instruction:'均匀淋上蛋液，待半凝固小心翻面'},{instruction:'再煎1-2分钟，两面金黄即可出锅'},{instruction:'趁热淋甜辣酱，撒香菜'}] },
+  { id: 3, name: '客家酿三宝', cookingMethod: 'braise', dishType: 'hakka', cookTimeMinutes: 40, servings: 2, householdId: 1, description: '肉馅要顺着一个方向搅上劲', imageUrl: '/assets/images/客家酿三宝.jpg', sourceUrl: 'https://www.rednote.com/explore/698a81eb000000000e03fffd', ingredients: [{name:'苦瓜',quantity:'1',unit:'根'},{name:'茄子',quantity:'1',unit:'根'},{name:'青椒',quantity:'3',unit:'个'},{name:'猪肉馅',quantity:'300',unit:'g'},{name:'香菇',quantity:'2',unit:'朵'},{name:'姜',quantity:'适量',unit:''},{name:'葱',quantity:'适量',unit:''},{name:'生抽',quantity:'1',unit:'勺'},{name:'蚝油',quantity:'1',unit:'勺'},{name:'盐',quantity:'少许',unit:''},{name:'淀粉',quantity:'1',unit:'勺'},{name:'白胡椒粉',quantity:'适量',unit:''}], steps:[{instruction:'猪肉馅+香菇碎+姜末+葱花，加生抽、蚝油、盐、白胡椒粉、淀粉，分次加水搅上劲'},{instruction:'苦瓜切段去瓤，茄子切厚段中间划一刀不切断，青椒去蒂去籽对半切'},{instruction:'把肉馅塞进苦瓜、茄子、青椒里，表面抹平'},{instruction:'平底锅少油，有肉面朝下小火煎至金黄定型'},{instruction:'翻面再煎一会儿'},{instruction:'加清水没过食材一半，放生抽、蚝油'},{instruction:'盖锅盖中小火焖10-15分钟'},{instruction:'开盖收汁，汤汁浓稠出锅'}] }
 ]
 
 // 从本地存储加载或使用默认数据
 function loadMockRecipes() {
   try {
+    // 检查是否需要重置数据（版本标记）
+    const dataVersion = wx.getStorageSync('mockDataVersion')
+    if (dataVersion !== 'v5') {
+      wx.setStorageSync('mockDataVersion', 'v5')
+      saveMockRecipes(defaultRecipes)
+      return defaultRecipes
+    }
+    
     const saved = wx.getStorageSync('mockRecipes')
     if (saved && Array.isArray(saved) && saved.length > 0) {
       return saved
@@ -129,13 +137,13 @@ function getMockData(url, data) {
       ...recipe,
       description: recipe.description || '经典家常菜',
       ingredients: recipe.ingredients || [
-        { id: 1, name: '番茄', nameEn: 'Tomato', quantity: '2', unit: '个' },
-        { id: 2, name: '鸡蛋', nameEn: 'Eggs', quantity: '3', unit: '个' }
+        { id: 1, name: '番茄', quantity: '2', unit: '个' },
+        { id: 2, name: '鸡蛋', quantity: '3', unit: '个' }
       ],
       steps: recipe.steps || [
-        { id: 1, instruction: '番茄切块', instructionEn: 'Cut tomatoes into pieces' },
-        { id: 2, instruction: '鸡蛋打散', instructionEn: 'Beat the eggs' },
-        { id: 3, instruction: '先炒鸡蛋，再炒番茄', instructionEn: 'Scramble eggs first, then stir-fry tomatoes' }
+        { id: 1, instruction: '番茄切块' },
+        { id: 2, instruction: '鸡蛋打散' },
+        { id: 3, instruction: '先炒鸡蛋，再炒番茄' }
       ]
     }
   }
@@ -324,6 +332,67 @@ function deleteRecipe(id) {
   return del('/recipe/delete', { id })
 }
 
+function parseTextWithAI(text) {
+  return new Promise(async function(resolve, reject) {
+    try {
+      var ai = wx.cloud.extend.AI.createModel('cloudbase')
+      
+      var prompt = '提取食谱JSON：\n' + text.substring(0, 1500) + '\n\n返回格式：{"name":"菜名","cookingMethod":"stir_fry/steam/cold_mix/braise/grill/boil/pan_fry","dishType":"other","cookTime":"","servings":"","ingredients":[{"name":"","quantity":"","unit":""}],"steps":[{"instruction":""}]}'
+
+      var res = await ai.streamText({
+        data: {
+          model: 'qwen3.5-flash',
+          messages: [
+            { role: 'system', content: '只返回JSON' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0,
+          max_tokens: 800
+        }
+      })
+
+      console.log('[AI] stream started')
+      
+      var aiContent = ''
+      for await (var str of res.textStream) {
+        aiContent += str
+      }
+      
+      console.log('[AI] content:', aiContent)
+      
+      // Clean markdown code blocks
+      var cleaned = aiContent
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '')
+        .replace(/`/g, '')
+        .trim()
+      
+      console.log('[AI] cleaned:', cleaned)
+      
+      // Parse JSON from response
+      var jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        var parsed = JSON.parse(jsonMatch[0])
+        resolve({
+          name: parsed.name || '',
+          cookingMethod: parsed.cookingMethod || 'stir_fry',
+          dishType: parsed.dishType || 'other',
+          cookTime: parsed.cookTime || '',
+          servings: parsed.servings || '',
+          ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients : [],
+          steps: Array.isArray(parsed.steps) ? parsed.steps : [],
+          sourceUrl: ''
+        })
+      } else {
+        reject(new Error('AI无法解析，请检查文字内容'))
+      }
+    } catch (err) {
+      console.error('[AI] error:', err)
+      reject(new Error(err.message || 'AI调用失败'))
+    }
+  })
+}
+
 function extractRecipe(url) {
   return post('/recipe/extract', { url })
 }
@@ -428,6 +497,7 @@ module.exports = {
   updateRecipe,
   deleteRecipe,
   extractRecipe,
+  parseTextWithAI,
   searchRecipes,
   getWeeklyPlan,
   addToWeeklyPlan,

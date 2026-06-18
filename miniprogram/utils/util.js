@@ -85,6 +85,15 @@ function navigateBack(delta = 1) {
   wx.navigateBack({ delta })
 }
 
+function requireAuth() {
+  const app = getApp()
+  if (!app.globalData.user) {
+    wx.navigateTo({ url: '/pages/login/login' })
+    return false
+  }
+  return true
+}
+
 module.exports = {
   getBeijingDate,
   getWeekStartDate,
@@ -100,5 +109,6 @@ module.exports = {
   navigateTo,
   redirectTo,
   switchTab,
-  navigateBack
+  navigateBack,
+  requireAuth
 }

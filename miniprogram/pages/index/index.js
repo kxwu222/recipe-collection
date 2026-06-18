@@ -8,7 +8,6 @@ Page({
     household: null,
     recentRecipes: [],
     isLoading: true,
-    isAuthenticated: false,
     t: {}
   },
 
@@ -18,24 +17,7 @@ Page({
 
   onShow() {
     this.updateTranslations()
-    this.checkAuth()
-  },
-
-  checkAuth() {
-    const app = getApp()
-    const user = app.globalData.user
-    if (user) {
-      this.setData({
-        user,
-        isAuthenticated: true
-      })
-      this.loadData()
-    } else {
-      this.setData({
-        isAuthenticated: false,
-        isLoading: false
-      })
-    }
+    this.loadData()
   },
 
   updateTranslations() {
@@ -101,6 +83,7 @@ Page({
   },
 
   goToAddRecipe() {
+    if (!util.requireAuth()) return
     wx.navigateTo({ url: '/pages/add-recipe/add-recipe' })
   },
 

@@ -5,9 +5,9 @@
   </view>
 
   <!-- Not Authenticated -->
-  <view wx:if="{{!isAuthenticated}}" class="flex-col items-center justify-center" style="min-height: 60vh;">
-    <view class="text-xl font-bold text-foreground mb-4">{{t.loginToContinue}}</view>
-    <button class="btn btn-primary" bindtap="goToLogin">
+  <view wx:if="{{!isAuthenticated}}" class="empty-state">
+    <view class="empty-state-text">{{t.loginToContinue}}</view>
+    <button class="btn btn-primary btn-sm mt-4" bindtap="goToLogin">
       <text>{{t.wechatLogin}}</text>
     </button>
   </view>

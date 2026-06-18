@@ -2,110 +2,98 @@
   <!-- Header -->
   <view class="flex items-center justify-between mb-4">
     <view class="text-3xl font-bold text-foreground">{{t.recipes}}</view>
-    <view wx:if="{{isAuthenticated}}" class="add-recipe-btn" bindtap="goToAddRecipe">
+    <view class="add-recipe-btn" bindtap="goToAddRecipe">
       <image src="/assets/images/plus-white.png" style="width: 28rpx; height: 28rpx;"></image>
       <text>{{t.addRecipe}}</text>
     </view>
   </view>
 
-  <!-- Not Authenticated -->
-  <view wx:if="{{!isAuthenticated}}" class="flex-col items-center justify-center" style="min-height: 60vh;">
-    <image src="/assets/images/recipes.png" style="width: 120rpx; height: 120rpx; margin-bottom: 24rpx;"></image>
-    <view class="text-xl font-bold text-foreground mb-4">{{t.loginToContinue}}</view>
-    <button class="btn btn-primary" bindtap="goToLogin">
-      <text>{{t.wechatLogin}}</text>
-    </button>
+  <!-- Search Bar -->
+  <view class="search-bar mb-4">
+    <image src="/assets/images/search.png" style="width: 32rpx; height: 32rpx;"></image>
+    <input 
+      placeholder="{{t.searchByIngredient}}" 
+      value="{{searchQuery}}"
+      bindinput="onSearchInput"
+      focus="{{focusSearch}}"
+      confirm-type="search"
+    />
+    <view wx:if="{{searchQuery.length > 0}}" bindtap="clearSearch">
+      <image src="/assets/images/close.png" style="width: 28rpx; height: 28rpx;"></image>
+    </view>
   </view>
 
-  <!-- Authenticated -->
-  <view wx:else>
-    <!-- Search Bar -->
-    <view class="search-bar mb-4">
-      <image src="/assets/images/search.png" style="width: 32rpx; height: 32rpx;"></image>
-      <input 
-        placeholder="{{t.searchByIngredient}}" 
-        value="{{searchQuery}}"
-        bindinput="onSearchInput"
-        focus="{{focusSearch}}"
-        confirm-type="search"
-      />
-      <view wx:if="{{searchQuery.length > 0}}" bindtap="clearSearch">
-        <image src="/assets/images/close.png" style="width: 28rpx; height: 28rpx;"></image>
-      </view>
+  <!-- Filters -->
+  <view class="mb-4">
+    <!-- Cooking Method Filter -->
+    <view class="mb-2">
+      <view class="text-sm font-semibold text-muted mb-2">{{t.cookingMethod}}</view>
+      <scroll-view scroll-x class="filter-scroll">
+        <view 
+          class="filter-chip {{selectedMethod === null ? 'active' : ''}}" 
+          bindtap="selectMethod"
+          data-method="{{null}}"
+        >{{t.all}}</view>
+        <view 
+          wx:for="{{cookingMethods}}" 
+          wx:key="id"
+          class="filter-chip {{selectedMethod === item.id ? 'active' : ''}}"
+          bindtap="selectMethod"
+          data-method="{{item.id}}"
+        >{{item.label}}</view>
+      </scroll-view>
     </view>
 
-    <!-- Filters -->
-    <view class="mb-4">
-      <!-- Cooking Method Filter -->
-      <view class="mb-2">
-        <view class="text-sm font-semibold text-muted mb-2">{{t.cookingMethod}}</view>
-        <scroll-view scroll-x class="filter-scroll">
-          <view 
-            class="filter-chip {{selectedMethod === null ? 'active' : ''}}" 
-            bindtap="selectMethod"
-            data-method="{{null}}"
-          >{{t.all}}</view>
-          <view 
-            wx:for="{{cookingMethods}}" 
-            wx:key="id"
-            class="filter-chip {{selectedMethod === item.id ? 'active' : ''}}"
-            bindtap="selectMethod"
-            data-method="{{item.id}}"
-          >{{item.label}}</view>
-        </scroll-view>
-      </view>
-
-      <!-- Dish Type Filter -->
-      <view>
-        <view class="text-sm font-semibold text-muted mb-2">{{t.dishType}}</view>
-        <scroll-view scroll-x class="filter-scroll">
-          <view 
-            class="filter-chip {{selectedType === null ? 'active' : ''}}" 
-            bindtap="selectType"
-            data-type="{{null}}"
-          >{{t.all}}</view>
-          <view 
-            wx:for="{{dishTypes}}" 
-            wx:key="id"
-            class="filter-chip {{selectedType === item.id ? 'active' : ''}}"
-            bindtap="selectType"
-            data-type="{{item.id}}"
-          >{{item.label}}</view>
-        </scroll-view>
-      </view>
+    <!-- Dish Type Filter -->
+    <view>
+      <view class="text-sm font-semibold text-muted mb-2">{{t.dishType}}</view>
+      <scroll-view scroll-x class="filter-scroll">
+        <view 
+          class="filter-chip {{selectedType === null ? 'active' : ''}}" 
+          bindtap="selectType"
+          data-type="{{null}}"
+        >{{t.all}}</view>
+        <view 
+          wx:for="{{dishTypes}}" 
+          wx:key="id"
+          class="filter-chip {{selectedType === item.id ? 'active' : ''}}"
+          bindtap="selectType"
+          data-type="{{item.id}}"
+        >{{item.label}}</view>
+      </scroll-view>
     </view>
+  </view>
 
-    <!-- Recipe List -->
-    <view wx:if="{{isLoading}}" class="loading-container">
-      <view>{{t.loading}}</view>
-    </view>
+  <!-- Recipe List -->
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <view>{{t.loading}}</view>
+  </view>
 
-    <view wx:elif="{{filteredRecipes.length > 0}}" class="recipe-grid" style="margin-top: 16rpx;">
-      <view 
-        wx:for="{{filteredRecipes}}" 
-        wx:key="id"
-        class="recipe-card"
-        data-id="{{item.id}}"
-        bindtap="goToRecipe"
-      >
-        <view class="recipe-card-image">
-          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" class="recipe-card-image-img" mode="aspectFill"></image>
-          <image wx:else src="/assets/images/recipes.png" style="width: 48rpx; height: 48rpx;"></image>
-        </view>
-        <view class="recipe-card-title">{{item.name}}</view>
-        <view class="recipe-card-tags">
-          <view class="tag">{{item.cookingMethodLabel}}</view>
-          <view class="tag">{{item.dishTypeLabel}}</view>
-        </view>
+  <view wx:elif="{{filteredRecipes.length > 0}}" class="recipe-grid" style="margin-top: 16rpx;">
+    <view 
+      wx:for="{{filteredRecipes}}" 
+      wx:key="id"
+      class="recipe-card"
+      data-id="{{item.id}}"
+      bindtap="goToRecipe"
+    >
+      <view class="recipe-card-image">
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" class="recipe-card-image-img" mode="aspectFill"></image>
+        <image wx:else src="/assets/images/recipes.png" style="width: 48rpx; height: 48rpx;"></image>
+      </view>
+      <view class="recipe-card-title">{{item.name}}</view>
+      <view class="recipe-card-tags">
+        <view class="tag">{{item.cookingMethodLabel}}</view>
+        <view class="tag">{{item.dishTypeLabel}}</view>
       </view>
     </view>
+  </view>
 
-    <view wx:else class="empty-state">
-      <view class="empty-state-icon">
-        <image src="/assets/images/search.png" style="width: 80rpx; height: 80rpx;"></image>
-      </view>
-      <view class="empty-state-text">{{t.noRecipes}}</view>
-      <button class="btn btn-primary btn-sm mt-4" bindtap="goToAddRecipe">{{t.addYourFirstRecipe}}</button>
+  <view wx:else class="empty-state">
+    <view class="empty-state-icon">
+      <image src="/assets/images/search.png" style="width: 80rpx; height: 80rpx;"></image>
     </view>
+    <view class="empty-state-text">{{t.noRecipes}}</view>
+    <button class="btn btn-primary btn-sm mt-4" bindtap="goToAddRecipe">{{t.addYourFirstRecipe}}</button>
   </view>
 </view>

@@ -1,5 +1,5 @@
 const api = require('../../utils/api')
-const { t } = require('../../utils/i18n')
+const { t, getCookingMethods, getDishTypes, addCustomCookingMethod, removeCustomCookingMethod, addCustomDishType, removeCustomDishType } = require('../../utils/i18n')
 const util = require('../../utils/util')
 
 Page({
@@ -8,6 +8,10 @@ Page({
     isAuthenticated: false,
     household: null,
     recipeCount: 0,
+    cookingMethods: [],
+    dishTypes: [],
+    showMethodSection: false,
+    showTypeSection: false,
     t: {}
   },
 
@@ -18,6 +22,7 @@ Page({
 
   onShow() {
     this.updateTranslations()
+    this.loadCustomLists()
     this.checkAuth()
   },
 
@@ -37,8 +42,87 @@ Page({
       viewMembers: t('viewMembers'),
       totalRecipes: t('totalRecipes'),
       logout: t('logout'),
-      login: t('login')
+      login: t('login'),
+      cookingMethod: t('cookingMethod'),
+      dishType: t('dishType')
     }
+  },
+
+  loadCustomLists() {
+    this.setData({
+      cookingMethods: getCookingMethods(),
+      dishTypes: getDishTypes()
+    })
+  },
+
+  toggleMethodSection() {
+    this.setData({ showMethodSection: !this.data.showMethodSection })
+  },
+
+  toggleTypeSection() {
+    this.setData({ showTypeSection: !this.data.showTypeSection })
+  },
+
+  addCookingMethod() {
+    wx.showModal({
+      title: '添加烹饪方法',
+      editable: true,
+      placeholderText: '例如：煎、炸、焗',
+      success: (res) => {
+        if (res.confirm && res.content && res.content.trim()) {
+          addCustomCookingMethod(res.content.trim())
+          this.loadCustomLists()
+          wx.showToast({ title: '已添加', icon: 'success' })
+        }
+      }
+    })
+  },
+
+  deleteCookingMethod(e) {
+    const id = e.currentTarget.dataset.id
+    const label = e.currentTarget.dataset.label
+    wx.showModal({
+      title: '删除确认',
+      content: `确定删除「${label}」吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          removeCustomCookingMethod(id)
+          this.loadCustomLists()
+          wx.showToast({ title: '已删除', icon: 'success' })
+        }
+      }
+    })
+  },
+
+  addDishType() {
+    wx.showModal({
+      title: '添加菜系',
+      editable: true,
+      placeholderText: '例如：川菜、湘菜、鲁菜',
+      success: (res) => {
+        if (res.confirm && res.content && res.content.trim()) {
+          addCustomDishType(res.content.trim())
+          this.loadCustomLists()
+          wx.showToast({ title: '已添加', icon: 'success' })
+        }
+      }
+    })
+  },
+
+  deleteDishType(e) {
+    const id = e.currentTarget.dataset.id
+    const label = e.currentTarget.dataset.label
+    wx.showModal({
+      title: '删除确认',
+      content: `确定删除「${label}」吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          removeCustomDishType(id)
+          this.loadCustomLists()
+          wx.showToast({ title: '已删除', icon: 'success' })
+        }
+      }
+    })
   },
 
   checkAuth() {

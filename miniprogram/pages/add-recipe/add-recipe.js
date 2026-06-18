@@ -9,6 +9,7 @@ Page({
     smartText: '',
     sourceUrl: '',
     isParsing: false,
+    loadingText: '正在AI识别...',
     parsedResult: null,
     imageUrl: '',
     imageFile: null,
@@ -40,10 +41,9 @@ Page({
       this.setData({ isAuthenticated: true })
       this.loadHousehold()
     } else {
-      // For development with mock data, allow access without auth
       this.setData({ 
-        isAuthenticated: true,
-        householdId: 'mock-household-1'
+        isAuthenticated: false,
+        householdId: null
       })
     }
   },
@@ -81,6 +81,7 @@ Page({
       braise: t('braise'),
       grill: t('grill'),
       boil: t('boil'),
+      pan_fry: t('pan_fry'),
       cantonese: t('cantonese'),
       chaoshan: t('chaoshan'),
       hakka: t('hakka'),
@@ -89,7 +90,11 @@ Page({
       other: t('other'),
       loginToContinue: t('loginToContinue'),
       wechatLogin: t('wechatLogin'),
-      loading: t('loading')
+      loading: t('loading'),
+      importFromUrl: t('importFromUrl'),
+      pasteLink: t('pasteLink'),
+      parse: t('parse'),
+      supportedPlatforms: t('supportedPlatforms')
     }
   },
 
@@ -112,25 +117,54 @@ Page({
     this.setData({ sourceUrl: e.detail.value })
   },
 
-  handleSmartParse() {
-    const { smartText } = this.data
+  startLoadingText() {
+    var texts = [
+      '正在AI识别',
+      '正在分析食材',
+      '正在提取步骤',
+      '正在整理食谱',
+      '马上就好'
+    ]
+    var index = 0
+    this.setData({ loadingText: texts[0] })
+    this._loadingTimer = setInterval(function() {
+      index = (index + 1) % texts.length
+      this.setData({ loadingText: texts[index] })
+    }.bind(this), 2500)
+  },
+
+  stopLoadingText() {
+    if (this._loadingTimer) {
+      clearInterval(this._loadingTimer)
+      this._loadingTimer = null
+    }
+  },
+
+  async handleSmartParse() {
+    var smartText = this.data.smartText
+    var sourceUrl = this.data.sourceUrl
     
-    if (!smartText.trim()) {
-      util.showError('请输入菜谱文字')
+    if (!smartText || !smartText.trim()) {
+      util.showError('请粘贴菜谱文字')
       return
     }
 
     this.setData({ isParsing: true })
+    this.startLoadingText()
 
     try {
-      const result = this.parseRecipeText(smartText)
+      var result = await api.parseTextWithAI(smartText.trim())
+      this.stopLoadingText()
+      result.sourceUrl = sourceUrl || ''
       this.setData({ 
         parsedResult: result,
         isParsing: false 
       })
+      util.showSuccess('识别成功')
     } catch (err) {
+      this.stopLoadingText()
       this.setData({ isParsing: false })
-      util.showError('解析失败，请检查文字格式')
+      util.showError(err.message || '识别失败，请检查文字内容')
     }
   },
 
@@ -150,8 +184,9 @@ Page({
       'steam': ['蒸', '清蒸', '隔水蒸'],
       'cold_mix': ['凉拌', '拌', '白灼'],
       'braise': ['炖', '焖', '红烧', '卤', '煲'],
-      'grill': ['烤', '烧烤', '炙', '煎'],
-      'boil': ['煮', '水煮', '白煮', '汆']
+      'grill': ['烤', '烧烤', '炙'],
+      'boil': ['煮', '水煮', '白煮', '汆'],
+      'pan_fry': ['煎', '香煎']
     }
 
     const dishTypeKeywords = {
@@ -325,6 +360,8 @@ Page({
   },
 
   async handleApplyParsed() {
+    if (!util.requireAuth()) return
+    
     const { parsedResult, householdId, imageUrl, sourceUrl } = this.data
     
     if (!parsedResult) return

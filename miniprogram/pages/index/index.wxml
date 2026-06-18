@@ -1,99 +1,87 @@
 <view class="container">
-  <!-- Not Authenticated -->
-  <view wx:if="{{!isAuthenticated}}" class="flex-col items-center justify-center" style="min-height: 60vh;">
-    <image src="/assets/images/home.png" style="width: 120rpx; height: 120rpx; margin-bottom: 24rpx;"></image>
-    <view class="text-sm text-muted mb-4" style="text-align: center;">{{t.loginHint}}</view>
-    <button class="btn btn-primary" bindtap="goToLogin">
-      <text>{{t.wechatLogin}}</text>
-    </button>
+  <!-- Welcome Header -->
+  <view class="mb-6">
+    <view class="text-3xl font-bold text-foreground">{{t.welcomeToKitchen}}</view>
   </view>
 
-  <!-- Authenticated -->
-  <view wx:else>
-    <!-- Welcome Header -->
-    <view class="mb-6">
-      <view class="text-3xl font-bold text-foreground">{{t.welcomeBack}}</view>
-    </view>
-
-    <!-- Quick Actions -->
-    <view class="mb-6">
-      <view class="quick-actions-row">
-        <view class="quick-action-card tall" bindtap="goToAddRecipe">
-          <image src="/assets/images/recipe-new.png" style="width: 60rpx; height: 60rpx; padding-bottom: 8rpx;"></image>
-          <text class="quick-action-text">{{t.addRecipe}}</text>
-        </view>
-        <view class="quick-actions-stack">
-          <view class="quick-action-card" bindtap="goToThisWeek">
-            <image src="/assets/images/calendar-new.png" style="width: 50rpx; height: 50rpx; padding-left: 8rpx;"></image>
-            <text class="quick-action-text" style="padding-left: 10rpx">{{t.thisWeek}}</text>
-          </view>
-          <view class="quick-action-card" bindtap="goToToBuyList">
-            <image src="/assets/images/shopping-cart-new.png" style="width: 50rpx; height: 50rpx; padding-left: 8rpx;"></image>
-            <text class="quick-action-text" style="padding-left: 10rpx;">{{t.toBuyList}}</text>
-          </view>
-        </view>
+  <!-- Quick Actions -->
+  <view class="mb-6">
+    <view class="quick-actions-row">
+      <view class="quick-action-card tall" bindtap="goToAddRecipe">
+        <image src="/assets/images/recipe-new.png" style="width: 60rpx; height: 60rpx; padding-bottom: 8rpx;"></image>
+        <text class="quick-action-text">+ {{t.addRecipe}}</text>
       </view>
-      <view class="quick-action-cta" bindtap="goToSearch">
-        <text style="padding-left: 16rpx;">{{t.viewAllRecipes}}</text>
-        <image src="/assets/images/chevron-right.png" style="width: 36rpx; height: 36rpx;"></image>
-      </view>
-    </view>
-
-    <!-- Family Section -->
-    <view class="mb-6" wx:if="{{household}}">
-      <view class="card" bindtap="goToFamily">
-        <view class="flex items-center justify-between">
-          <view class="flex items-center gap-2">
-            <image src="/assets/images/group.png" style="width: 46rpx; height: 46rpx; padding-left: 8rpx;"></image>
-            <view class="font-bold text-foreground" style="padding-left: 10rpx;">{{household.name}}</view>
-          </view>
-          <view class="text-primary text-sm view">{{t.view}}</view>
+      <view class="quick-actions-stack">
+        <view class="quick-action-card" bindtap="goToThisWeek">
+          <image src="/assets/images/calendar-new.png" style="width: 50rpx; height: 50rpx; padding-left: 8rpx;"></image>
+          <text class="quick-action-text" style="padding-left: 10rpx">{{t.thisWeek}}</text>
+        </view>
+        <view class="quick-action-card" bindtap="goToToBuyList">
+          <image src="/assets/images/shopping-cart-new.png" style="width: 50rpx; height: 50rpx; padding-left: 8rpx;"></image>
+          <text class="quick-action-text" style="padding-left: 10rpx;">{{t.toBuyList}}</text>
         </view>
       </view>
     </view>
+    <view class="quick-action-cta" style="margin-top: 30rpx;" bindtap="goToSearch">
+      <text style="padding-left: 16rpx;">{{t.viewAllRecipes}}</text>
+      <image src="/assets/images/chevron-right.png" style="width: 36rpx; height: 36rpx;"></image>
+    </view>
+  </view>
 
-    <!-- Recent Recipes -->
-    <view class="mb-6">
-      <view class="flex items-center justify-between mb-4">
-        <view class="text-lg font-bold text-foreground">{{t.recentRecipes}}</view>
-        <view class="text-primary text-sm" bindtap="goToRecipes">{{t.viewAll}}</view>
+  <!-- Family Section -->
+  <view class="mb-6" wx:if="{{household}}">
+    <view class="card" bindtap="goToFamily">
+      <view class="flex items-center justify-between">
+        <view class="flex items-center gap-2">
+          <image src="/assets/images/group.png" style="width: 46rpx; height: 46rpx; padding-left: 8rpx;"></image>
+          <view class="font-bold text-foreground" style="padding-left: 10rpx;">{{household.name}}</view>
+        </view>
+        <view class="text-primary text-sm view">{{t.view}}</view>
       </view>
+    </view>
+  </view>
 
-      <view wx:if="{{isLoading}}" class="loading-container">
-        <view>{{t.loading}}</view>
-      </view>
+  <!-- Recent Recipes -->
+  <view class="mb-6">
+    <view class="flex items-center justify-between mb-4">
+      <view class="text-lg font-bold text-foreground">{{t.recentRecipes}}</view>
+      <view class="text-primary text-sm" bindtap="goToRecipes">{{t.viewAll}}</view>
+    </view>
 
-      <view wx:elif="{{recentRecipes.length > 0}}" class="recipe-scroll-container">
-        <view class="recipe-scroll-inner">
-          <view 
-            wx:for="{{recentRecipes}}" 
-            wx:key="id"
-            class="recipe-mini-card"
-            data-id="{{item.id}}"
-            bindtap="goToRecipe"
-          >
-            <view class="recipe-mini-image">
-              <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" style="width: 100%; height: 100%; border-radius: 16rpx;"></image>
-              <image wx:else src="/assets/images/recipes.png" style="width: 48rpx; height: 48rpx;"></image>
-            </view>
-            <view class="recipe-mini-content">
-              <view class="recipe-mini-title">{{item.name}}</view>
-              <view class="recipe-mini-tags">
-                <view class="mini-tag">{{item.cookingMethodLabel}}</view>
-                <view class="mini-tag">{{item.dishTypeLabel}}</view>
-              </view>
+    <view wx:if="{{isLoading}}" class="loading-container">
+      <view>{{t.loading}}</view>
+    </view>
+
+    <view wx:elif="{{recentRecipes.length > 0}}" class="recipe-scroll-container">
+      <view class="recipe-scroll-inner">
+        <view 
+          wx:for="{{recentRecipes}}" 
+          wx:key="id"
+          class="recipe-mini-card"
+          data-id="{{item.id}}"
+          bindtap="goToRecipe"
+        >
+          <view class="recipe-mini-image">
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" style="width: 100%; height: 100%; border-radius: 16rpx;"></image>
+            <image wx:else src="/assets/images/recipes.png" style="width: 48rpx; height: 48rpx;"></image>
+          </view>
+          <view class="recipe-mini-content">
+            <view class="recipe-mini-title">{{item.name}}</view>
+            <view class="recipe-mini-tags">
+              <view class="mini-tag">{{item.cookingMethodLabel}}</view>
+              <view class="mini-tag">{{item.dishTypeLabel}}</view>
             </view>
           </view>
         </view>
       </view>
+    </view>
 
-      <view wx:else class="empty-state">
-        <view class="empty-state-icon">
-          <image src="/assets/images/recipes.png" style="width: 80rpx; height: 80rpx;"></image>
-        </view>
-        <view class="empty-state-text">{{t.noRecipes}}</view>
-        <button class="btn btn-primary btn-sm mt-4" bindtap="goToAddRecipe">{{t.addYourFirstRecipe}}</button>
+    <view wx:else class="empty-state">
+      <view class="empty-state-icon">
+        <image src="/assets/images/recipes.png" style="width: 80rpx; height: 80rpx;"></image>
       </view>
+      <view class="empty-state-text">{{t.noRecipes}}</view>
+      <button class="btn btn-primary btn-sm mt-4" bindtap="goToAddRecipe">{{t.addYourFirstRecipe}}</button>
     </view>
   </view>
 </view>

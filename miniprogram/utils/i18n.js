@@ -25,7 +25,7 @@ const translations = {
   imageUpload: '封面图',
   all: '全部',
   recipeName: '菜谱名称',
-  description: '描述',
+  description: '笔记',
   cookingMethod: '烹饪方法',
   dishType: '菜系',
   servings: '份量',
@@ -49,6 +49,7 @@ const translations = {
   braise: '炖',
   grill: '烤',
   boil: '煮',
+  pan_fry: '煎',
   cantonese: '粤菜',
   chaoshan: '潮汕菜',
   hakka: '客家菜',
@@ -151,30 +152,104 @@ const translations = {
   removeFromWeekConfirm: '从本周移除这个菜谱？',
   quantity: '数量',
   unit: '单位',
-  notes: '备注'
+  notes: '备注',
+  importFromUrl: '从链接导入',
+  pasteLink: '粘贴',
+  parse: '解析',
+  supportedPlatforms: '支持小红书、下厨房、微信视频、今日头条、抖音、B站等',
+  orManualInput: '或手动输入'
 }
 
 function t(key) {
   return translations[key] || key
 }
 
+const builtInCookingMethods = [
+  { id: 'stir_fry', label: '炒' },
+  { id: 'steam', label: '蒸' },
+  { id: 'cold_mix', label: '凉拌' },
+  { id: 'braise', label: '炖' },
+  { id: 'grill', label: '烤' },
+  { id: 'boil', label: '煮' },
+  { id: 'pan_fry', label: '煎' }
+]
+
+const builtInDishTypes = [
+  { id: 'cantonese', label: '粤菜' },
+  { id: 'chaoshan', label: '潮汕菜' },
+  { id: 'hakka', label: '客家菜' }
+]
+
+function getCustomList(storageKey) {
+  try {
+    return wx.getStorageSync(storageKey) || []
+  } catch (e) {
+    return []
+  }
+}
+
+function saveCustomList(storageKey, list) {
+  try {
+    wx.setStorageSync(storageKey, list)
+  } catch (e) {
+    console.error('Failed to save:', e)
+  }
+}
+
 function getCookingMethods() {
-  return [
-    { id: 'stir_fry', label: '炒' },
-    { id: 'steam', label: '蒸' },
-    { id: 'cold_mix', label: '凉拌' },
-    { id: 'braise', label: '炖' },
-    { id: 'grill', label: '烤' },
-    { id: 'boil', label: '煮' }
-  ]
+  const hidden = getCustomList('hiddenCookingMethods')
+  const customs = getCustomList('customCookingMethods')
+  return [...builtInCookingMethods.filter(i => !hidden.includes(i.id)), ...customs]
 }
 
 function getDishTypes() {
-  return [
-    { id: 'cantonese', label: '粤菜' },
-    { id: 'chaoshan', label: '潮汕菜' },
-    { id: 'hakka', label: '客家菜' }
-  ]
+  const hidden = getCustomList('hiddenDishTypes')
+  const customs = getCustomList('customDishTypes')
+  return [...builtInDishTypes.filter(i => !hidden.includes(i.id)), ...customs]
+}
+
+function addCustomCookingMethod(label) {
+  const list = getCustomList('customCookingMethods')
+  const item = { id: 'custom_method_' + Date.now(), label }
+  list.push(item)
+  saveCustomList('customCookingMethods', list)
+  return item
+}
+
+function removeCustomCookingMethod(id) {
+  const isBuiltIn = builtInCookingMethods.some(i => i.id === id)
+  if (isBuiltIn) {
+    const hidden = getCustomList('hiddenCookingMethods')
+    if (!hidden.includes(id)) {
+      hidden.push(id)
+      saveCustomList('hiddenCookingMethods', hidden)
+    }
+  } else {
+    const list = getCustomList('customCookingMethods').filter(i => i.id !== id)
+    saveCustomList('customCookingMethods', list)
+  }
+}
+
+function addCustomDishType(label) {
+  const list = getCustomList('customDishTypes')
+  const item = { id: 'custom_type_' + Date.now(), label }
+  list.push(item)
+  saveCustomList('customDishTypes', list)
+  return item
+}
+
+function removeCustomDishType(id) {
+  const isBuiltIn = builtInDishTypes.some(i => i.id === id)
+  if (isBuiltIn) {
+    const hidden = getCustomList('hiddenDishTypes')
+    if (!hidden.includes(id)) {
+      hidden.push(id)
+      saveCustomList('hiddenDishTypes', hidden)
+    }
+  } else {
+    const list = getCustomList('customDishTypes').filter(i => i.id !== id)
+    saveCustomList('customDishTypes', list)
+  }
 }
 
 function getCookingMethodLabel(id) {
@@ -194,5 +269,9 @@ module.exports = {
   getCookingMethods,
   getDishTypes,
   getCookingMethodLabel,
-  getDishTypeLabel
+  getDishTypeLabel,
+  addCustomCookingMethod,
+  removeCustomCookingMethod,
+  addCustomDishType,
+  removeCustomDishType
 }

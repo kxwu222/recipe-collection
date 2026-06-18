@@ -23,6 +23,9 @@ Page({
     dishTypes: [],
     showCookingMethodDropdown: false,
     showDishTypeDropdown: false,
+    currentServings: 0,
+    originalServings: 0,
+    scaledIngredients: [],
     t: {}
   },
 
@@ -139,6 +142,7 @@ Page({
       braise: t('braise'),
       grill: t('grill'),
       boil: t('boil'),
+      pan_fry: t('pan_fry'),
       // Dish types
       cantonese: t('cantonese'),
       chaoshan: t('chaoshan'),
@@ -159,7 +163,13 @@ Page({
       }
       
       const recipe = await api.getRecipe(this.data.recipeId)
-      this.setData({ recipe })
+      const servings = recipe.servings || 1
+      this.setData({ 
+        recipe,
+        currentServings: servings,
+        originalServings: servings,
+        scaledIngredients: recipe.ingredients || []
+      })
     } catch (err) {
       console.error('Failed to load recipe:', err)
       util.showError('加载失败')
@@ -326,6 +336,51 @@ Page({
 
   goBack() {
     util.navigateBack()
+  },
+
+  parseQuantity(str) {
+    if (!str) return { value: 0, hasValue: false }
+    str = str.toString().trim()
+    
+    var fractionMatch = str.match(/^(\d+)\/(\d+)$/)
+    if (fractionMatch) {
+      return { value: parseInt(fractionMatch[1]) / parseInt(fractionMatch[2]), hasValue: true }
+    }
+    
+    var numMatch = str.match(/^(\d+\.?\d*)/)
+    if (numMatch) {
+      return { value: parseFloat(numMatch[1]), hasValue: true, suffix: str.substring(numMatch[0].length) }
+    }
+    
+    return { value: 0, hasValue: false }
+  },
+
+  changeServings(e) {
+    var delta = parseInt(e.currentTarget.dataset.delta)
+    var { currentServings, originalServings, recipe } = this.data
+    var newServings = currentServings + delta
+    
+    if (newServings < 1) return
+    
+    var ratio = newServings / originalServings
+    var scaledIngredients = (recipe.ingredients || []).map(function(ing) {
+      var parsed = this.parseQuantity(ing.quantity)
+      if (parsed.hasValue) {
+        var scaled = parsed.value * ratio
+        var displayNum = scaled % 1 === 0 ? scaled.toString() : scaled.toFixed(1)
+        return {
+          name: ing.name,
+          quantity: parsed.suffix ? displayNum + parsed.suffix : displayNum,
+          unit: ing.unit || ''
+        }
+      }
+      return { name: ing.name, quantity: ing.quantity, unit: ing.unit || '' }
+    }.bind(this))
+    
+    this.setData({
+      currentServings: newServings,
+      scaledIngredients: scaledIngredients
+    })
   },
 
   goToLogin() {

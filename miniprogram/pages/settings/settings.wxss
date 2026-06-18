@@ -8,13 +8,119 @@
 }
 
 .text-primary.text-sm {
-  color: var(--text-primary);
-  border: 1rpx solid var(--text-primary);
+  color: var(--primary);
+  border: 1rpx solid var(--primary);
   border-radius: 20rpx;
   padding: 6rpx 16rpx 6rpx 16rpx;
-  box-shadow: 1px 1px 0px 0px var(--text-primary);
+  box-shadow: 1px 1px 0px 0px var(--primary);
 }
 
 .btn.btn-danger {
   letter-spacing: 1rpx;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20rpx;
+}
+
+.manage-section {
+  padding: 24rpx 0 0;
+}
+
+.manage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid var(--border);
+}
+
+.manage-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.manage-chevron {
+  width: 24rpx;
+  height: 24rpx;
+}
+
+.manage-body {
+  padding: 20rpx 0;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  background: var(--surface);
+  border: 1rpx solid var(--border);
+  border-radius: 24rpx;
+  padding: 10rpx 20rpx;
+}
+
+.tag-text {
+  font-size: 26rpx;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.tag-remove {
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4rpx;
+}
+
+.manage-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 0;
+  margin-top: 16rpx;
+  color: #8B6344;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.logout-pill {
+  background: white;
+  border: 1rpx solid var(--text-secondary);
+  border-radius: 20rpx;
+  padding: 6rpx 30rpx 6rpx 30rpx;
+}
+
+.logout-pill text {
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1rpx solid var(--text-secondary);
+  border-radius: 20rpx;
+  padding: 10rpx 30rpx 8rpx 30rpx;
+  margin: 40rpx auto;
+  width: 50%;
+  box-shadow: 2px 2px 0px 0px var(--text-primary);
+}
+
+.login-btn text {
+  color: var(--text-primary);
+  font-weight: 400;
 }

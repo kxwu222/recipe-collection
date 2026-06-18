@@ -105,6 +105,8 @@ Page({
   },
 
   async handleCreateHousehold() {
+    if (!util.requireAuth()) return
+    
     const { householdName } = this.data
     if (!householdName.trim()) {
       util.showError('请输入群名')
@@ -140,6 +142,8 @@ Page({
   },
 
   async handleUpdateHousehold() {
+    if (!util.requireAuth()) return
+    
     const { editHouseholdName, household } = this.data
     if (!editHouseholdName.trim()) {
       util.showError('请输入群名')

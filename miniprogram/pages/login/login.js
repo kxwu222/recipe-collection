@@ -65,7 +65,6 @@ Page({
         const mockUser = {
           id: 1,
           name: '测试用户',
-          email: 'test@example.com'
         }
         wx.setStorageSync('token', 'mock-token')
         wx.setStorageSync('user', mockUser)
